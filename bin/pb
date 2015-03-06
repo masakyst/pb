@@ -1,0 +1,64 @@
+#!/usr/bin/env perl
+
+=head1 SYNOPSIS
+
+    % ./pb --uri http://example.com [--con 10 --time 60 --debug]
+
+=cut
+
+use strict;
+use warnings;
+use utf8;
+use Getopt::Long qw/:config posix_default no_ignore_case bundling auto_help/;
+use Pod::Usage qw/pod2usage/;
+use Parallel::Benchmark;
+use Furl;
+use Log::Minimal;
+local $Log::Minimal::PRINT = sub {
+    my ( $time, $type, $message, $trace) = @_;
+    print "$time [-----] [$type] $message\n";
+};
+
+GetOptions(
+    \my %opt, qw/
+    uri=s
+    con=i
+    time=i
+    debug
+/) or pod2usage(1);
+
+my @required_options = qw/uri/;
+pod2usage(2) if grep {!exists $opt{$_}} @required_options;
+
+# default
+$opt{con}         ||= 5;
+$opt{time}        ||= 10;
+$opt{debug}       ||= 0;
+
+infof("Request URI: %s", $opt{uri});
+infof("concurrency: %s", $opt{con});
+
+my $bm = Parallel::Benchmark->new(
+    setup => sub {
+        my ($self) = @_; 
+        $self->stash->{ua} = Furl->new;
+    },  
+    benchmark => sub {
+        my ($self, $id) = @_; 
+        my $ua = $self->stash->{ua};
+        my $sub_score = 0;
+        my $res = $ua->get($opt{uri});
+        $sub_score++ if $res->is_success;
+        return $sub_score;
+    },  
+    teardown => sub {
+        my ($self) = @_; 
+        delete $self->stash->{ua};
+    },  
+    concurrency => $opt{con},
+    time        => $opt{time}, 
+    debug       => $opt{debug},
+);
+
+$bm->run;
+
