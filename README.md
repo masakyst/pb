@@ -16,3 +16,8 @@ $ pb --uri http://example.com [--con 10 --time 60 --debug]
   debug           output debug log        (default 0
 ```
 
+See Also
+--------
+
+- http://gihyo.jp/dev/serial/01/perl-hackers-hub/001703
+

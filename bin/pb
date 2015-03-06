@@ -2,7 +2,7 @@
 
 =head1 SYNOPSIS
 
-    % ./pb --uri http://example.com [--con 10 --time 60 --debug]
+    % pb --uri http://example.com [--con 10 --time 60 --debug]
 
 =cut
 
