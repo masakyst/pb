@@ -36,7 +36,6 @@ $opt{time}        ||= 3;
 $opt{debug}       ||= 0;
 
 infof("Request URI: %s", $opt{uri});
-infof("concurrency: %s", $opt{con});
 
 my $bm = Parallel::Benchmark->new(
     setup => sub {
